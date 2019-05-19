@@ -32,7 +32,7 @@ def addPoint():
     position = pointData['position']
     description = pointData['description']
     category = pointData['category']
-    visible = pointData['visible']
+    visible = True
 
     point = Point(position, name, description, category, visible)
 
