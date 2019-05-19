@@ -55,5 +55,5 @@ if __name__ == '__main__':
         for category in categories:
             mongo.db.categories.insert_one(category.__dict__)
 
-    app.config['DEBUG'] = os.environ.get('ENV') == 'development'
+    app.debug = os.environ.get('ENV') == 'development'
     app.run(host='0.0.0.0', port=int(PORT))
