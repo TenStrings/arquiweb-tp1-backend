@@ -2,6 +2,11 @@ import flask
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 
+from flask_jwt_extended import (
+    jwt_required,
+    get_jwt_identity, get_jwt_claims
+)
+
 from app.model.point import Point
 
 point = Blueprint("point", __name__)
@@ -38,7 +43,13 @@ def addPoint():
     return response, 201
 
 @point.route('/point/<id>', methods=['PUT'])
+@jwt_required
 def putPoint(id):
+    admin = claims = get_jwt_claims()['admin']
+
+    if not admin:
+        return jsonify({"msg": "Invalid credentials"}), 401
+    
     pointData = request.get_json()
 
     name = pointData['name']
