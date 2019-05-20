@@ -62,11 +62,7 @@ def updatePoint(id):
     return response, 201
 
 def updatePointsOfCategory(categoryName, newCategoryName, is_visible ):
-    ack = mongo.db.points.update({'categoryName' : categoryName}, {'categoryName': newCategoryName, 'visible': is_visible})
-    allPoints = mongo.db.points.find({'categoryName':categoryName})
-    for p in allPoints:
-        print(p, flush=True)
-
+    ack = mongo.db.points.update_many({'categoryName' : categoryName}, {'$set': {'categoryName': newCategoryName, 'visible': is_visible}})
 
 @point.route('/point/<id>', methods=['DELETE'])
 def deletePoint(id):

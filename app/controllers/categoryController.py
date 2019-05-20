@@ -49,9 +49,6 @@ def updateCategory(id):
     updatedCategory.visible = is_visible
     oldCategory = mongo.db.categories.find_one_and_update({'_id': ObjectId(id)},
                                                           {'$set':updatedCategory.__dict__} )
-    for c in mongo.db.categories.find({'_id': ObjectId(id)}):
-        print(c, flush=True)
-
     if oldCategory is not None:
         oldTitle = oldCategory['title']
         updatePointsOfCategory(oldTitle, newTitle, is_visible)
