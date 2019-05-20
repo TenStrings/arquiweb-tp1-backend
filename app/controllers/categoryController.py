@@ -1,7 +1,7 @@
 import flask
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
-
+from pymongo import ReturnDocument
 from app.model.category import Category
 from app.controllers.pointController import updatePointsOfCategory, deletePointsOfCategory
 
@@ -31,7 +31,7 @@ def addCategory():
 
     newCategory = Category(title, icon)
 
-    mongo.db.points.insert_one(category.__dict__)
+    mongo.db.categories.insert_one(category.__dict__)
     response = flask.make_response(jsonify({'inserted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
@@ -45,16 +45,18 @@ def updateCategory(id):
     newTitle = data['title']
     icon = "TODO send fname from frontend"
     is_visible = data['visible']
-    category= Category(newTitle, icon)
-    category.visible = is_visible
+    updatedCategory= Category(newTitle, icon)
+    updatedCategory.visible = is_visible
+    oldCategory = mongo.db.categories.find_one_and_update({'_id': ObjectId(id)},
+                                                          {'$set':updatedCategory.__dict__} )
+    for c in mongo.db.categories.find({'_id': ObjectId(id)}):
+        print(c, flush=True)
 
-    matching_categories = mongo.db.find({'_id': ObjectId(id)} )
-    is_category = matching_categories.hasNext()
-    if is_category:
-        oldTitle = matching_categories.next()['title']
+    if oldCategory is not None:
+        oldTitle = oldCategory['title']
         updatePointsOfCategory(oldTitle, newTitle, is_visible)
-
-    ack = mongo.db.categories.update({'_id' : ObjectId(id)}, category.__dict__)
+    else:
+        pass
 
     response = flask.make_response(jsonify({'updated': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -63,12 +65,12 @@ def updateCategory(id):
 
 @category.route('/category/<id>', methods=['DELETE'])
 def deleteCategory(id):
-    matching_categories = mongo.db.find({'_id': ObjectId(id)} )
-    is_category = matching_categories.hasNext()
-    db_response = mongo.db.categories.delete_one({'_id': ObjectId(id)})
-    if was_category:
-        categoryName = matching_categories.next()['title']
+    category = mongo.db.categories.find_one_and_delete( {'_id': ObjectId(id)} )
+    if category is not None:
+        categoryName = category['title']
         deletePointsOfCategory(categoryName)
+    else: #doesn't have a hasNext()
+        pass
 
     response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
