@@ -2,62 +2,74 @@ import flask
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 
-from app.model.point import Point
+from app.model.category import Category
+from app.controllers.pointController import updatePointsOfCategory, deletePointsOfCategory
 
 category = Blueprint("category", __name__)
 
 # no cambiar el lugar del import por las dependencias circulares
 from app import mongo
 
-
 @category.route('/category', methods=['GET'])
 def getAllCategories():
     allCategories = mongo.db.categories.find({})
     result = [cat for cat in allCategories]
+
     response = flask.make_response(jsonify(result))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
-
-
 @category.route('/category', methods=['POST'])
 def addCategory():
-    pointData = request.get_json()
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
 
-    name = pointData['name']
-    position = pointData['position']
-    description = pointData['description']
-    category = pointData['category']
+    data = request.get_json()
 
-    point = Point(position, name, description, category)
+    title = data['title']
+    icon = "TODO send fname from frontend"
 
-    mongo.db.points.insert_one(point.__dict__)
-    response = flask.make_response(jsonify({'point inserted': True}))
+    newCategory = Category(title, icon)
+
+    mongo.db.points.insert_one(category.__dict__)
+    response = flask.make_response(jsonify({'inserted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 201
 
+@category.route('/category/<id>', methods=['PUT'])
+def updateCategory(id):
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    data = request.get_json()
+    newTitle = data['title']
+    icon = "TODO send fname from frontend"
+    is_visible = data['visible']
+    category= Category(newTitle, icon)
+    category.visible = is_visible
+
+    matching_categories = mongo.db.find({'_id': ObjectId(id)} )
+    is_category = matching_categories.hasNext()
+    if is_category:
+        oldTitle = matching_categories.next()['title']
+        updatePointsOfCategory(oldTitle, newTitle, is_visible)
+
+    ack = mongo.db.categories.update({'_id' : ObjectId(id)}, category.__dict__)
+
+    response = flask.make_response(jsonify({'updated': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
 
 
 @category.route('/category/<id>', methods=['DELETE'])
-def deletePoint(id):
-    db_response = mongo.db.points.delete_one({'_id': ObjectId(id)})
-    if db_response.deleted_count == 1:
-        response = flask.make_response(jsonify({'deleted': True, 'message': 'record deleted'}))
-        response.headers['Access-Control-Allow-Origin'] = '*'
+def deleteCategory(id):
+    matching_categories = mongo.db.find({'_id': ObjectId(id)} )
+    is_category = matching_categories.hasNext()
+    db_response = mongo.db.categories.delete_one({'_id': ObjectId(id)})
+    if was_category:
+        categoryName = matching_categories.next()['title']
+        deletePointsOfCategory(categoryName)
 
-        return response, 200
-    else:
-        response = flask.make_response(jsonify({'deleted': True, 'message': 'no record found'}))
-        response.headers['Access-Control-Allow-Origin'] = '*'
-
-        return response, 404
-
-
-@category.route('/category', methods=['DELETE'])
-def deleteAllPoints():
-    mongo.db.points.remove({})
-
-    response = flask.make_response(jsonify({'message': 'records deleted'}))
+    response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
-
     return response, 200

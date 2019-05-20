@@ -24,10 +24,10 @@ if __name__ == '__main__':
     points = []
     categories = []
 
-    point1 = Point({'lat': -34.6, 'lng': -58.5}, 'macDonald', 'muchas gordas', "Food", True)
-    point2 = Point({'lat': -34.52, 'lng': -58.55}, 'burgerKing', 'muchas gordas', "Food", False)
-    point3 = Point({'lat': -34.58319, 'lng': -58.4432}, 'Estadio de football', 'fui de pepa', "Sports", True)
-    point4 = Point({'lat': -34.573, 'lng': -58.4548}, 'FutureBar', 'rica, amaaaaargaa', "Night Life", True)
+    point1 = Point({'lat': -34.6, 'lng': -58.5}, 'macDonald', 'muchas gordas', "photo.png", "Food")
+    point2 = Point({'lat': -34.52, 'lng': -58.55}, 'burgerKing', 'muchas gordas', "photo.png", "Food")
+    point3 = Point({'lat': -34.58319, 'lng': -58.4432}, 'Estadio de football', 'fui de pepa', "photo.png", "Sports")
+    point4 = Point({'lat': -34.573, 'lng': -58.4548}, 'FutureBar', 'rica, amaaaaargaa', "photo.png", "Night Life")
 
     cat1 = Category("Food", "idk1")
     cat2 = Category("Night Life", "idk2")
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     categories.append(cat2)
     categories.append(cat3)
 
-    print("cargando datos de prueba", flush=True)
+    print("Cargando datos de prueba", flush=True)
 
     with app.app_context():
 
