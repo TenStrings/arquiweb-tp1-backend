@@ -39,6 +39,7 @@ def addPoint():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
 
+
 @point.route('/point/<id>', methods=['PUT'])
 def updatePoint(id):
     if not request.is_json:
@@ -55,14 +56,21 @@ def updatePoint(id):
     point = Point(position, name, description, image, categoryName)
     point.visible = visible
 
-    ack = mongo.db.points.update({'_id' : ObjectId(id)}, point.__dict__)
+    ack = mongo.db.points.update({'_id': ObjectId(id)}, point.__dict__)
 
     response = flask.make_response(jsonify({'updated': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
 
-def updatePointsOfCategory(categoryName, newCategoryName, is_visible ):
-    ack = mongo.db.points.update_many({'categoryName' : categoryName}, {'$set': {'categoryName': newCategoryName, 'visible': is_visible}})
+
+def updatePointsOfCategory(categoryName, newCategoryName, is_visible):
+    ack = mongo.db.points.update_many({'categoryName': categoryName},
+                                      {'$set': {'categoryName': newCategoryName, 'visible': is_visible}})
+
+
+def updatePointsOfCategoryWithTitle(categoryName, newCategoryName):
+    ack = mongo.db.points.update_many({'categoryName': categoryName}, {'$set': {'categoryName': newCategoryName}})
+
 
 @point.route('/point/<id>', methods=['DELETE'])
 def deletePoint(id):
@@ -71,6 +79,7 @@ def deletePoint(id):
     response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 200
+
 
 def deletePointsOfCategory(categoryName):
     db_response = mongo.db.points.remove({'categoryName': categoryName})
