@@ -27,11 +27,10 @@ def addCategory():
     data = request.get_json()
 
     title = data['title']
-    icon = "TODO send fname from frontend"
+    icon = data['icon']
 
     newCategory = Category(title, icon)
-
-    mongo.db.categories.insert_one(category.__dict__)
+    mongo.db.categories.insert_one(newCategory.__dict__)
     response = flask.make_response(jsonify({'inserted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201

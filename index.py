@@ -48,6 +48,7 @@ if __name__ == '__main__':
 
         mongo.db.points.remove({})
         mongo.db.categories.remove({})
+        mongo.db.suggestions.remove({})
 
         for point in points:
             mongo.db.points.insert_one(point.__dict__)
