@@ -85,7 +85,6 @@ def updateCategoryVisibility(id):
                                                           {'$set': updatedCategory.__dict__})
     if oldCategory is not None:
         oldTitle = oldCategory['title']
-        print('UPDATING POINTS', flush=True)
         updatePointsOfCategory(oldTitle, newTitle, is_visible)
     else:
         pass

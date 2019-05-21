@@ -40,8 +40,8 @@ def addPoint():
     return response, 201
 
 
-@point.route('/point/<id>', methods=['PUT'])
-def updatePoint(id):
+@point.route('/point/<id>/visibility', methods=['PUT'])
+def updatePointVisibility(id):
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
     pointData = request.get_json()
@@ -57,6 +57,46 @@ def updatePoint(id):
     point.visible = visible
 
     ack = mongo.db.points.update({'_id': ObjectId(id)}, point.__dict__)
+
+    response = flask.make_response(jsonify({'updated': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 201
+
+
+@point.route('/point/<id>', methods=['PUT'])
+def updatePoint(id):
+    data = request.files
+    pointData = request.form
+
+    values = {}
+
+    print(pointData, flush=True)
+    name = pointData['name']
+    print('llega2', flush=True)
+    print('llega3', flush=True)
+    description = pointData['description']
+    print('llega4', flush=True)
+    categoryName = pointData['categoryName']
+    print('llega5', flush=True)
+    visible = pointData['visible']
+    print('llega6', flush=True)
+    img = data['file']
+    print('llega7', flush=True)
+
+    values['name'] = name
+    values['description'] = description
+    values['categoryName'] = categoryName
+    values['visible'] = visible
+
+    print('llega8', flush=True)
+
+    try:
+        print('llega9', flush=True)
+        img.save('/usr/src/web/app/static/pointImages/' + name)
+    except Exception as e:
+        print(e, flush=True)
+
+    ack = mongo.db.points.update({'_id': ObjectId(id)}, {'$set': values})
 
     response = flask.make_response(jsonify({'updated': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
