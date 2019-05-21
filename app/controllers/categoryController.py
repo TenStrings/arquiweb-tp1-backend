@@ -1,9 +1,11 @@
 import flask
+import random
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from app.model.category import Category
 from app.controllers.pointController import updatePointsOfCategory, deletePointsOfCategory
 from app.controllers.pointController import updatePointsOfCategoryWithTitle
+
 
 category = Blueprint("category", __name__)
 
@@ -45,19 +47,19 @@ def updateCategory(id):
 
     img = data['file']
     newTitle = request.form['title']
+    newIcon = newTitle + str(random.randint(0,1000)) #para que cambie el icono y refrezque
 
-    updatedCategory= Category(newTitle, 'icon')
-    updatedCategory.visible = True
+    updatedCategory= Category(newTitle, newTitle)
 
     oldCategory = mongo.db.categories.find_one_and_update({'_id': ObjectId(id)},
-                                                          {'$set':{'title': newTitle}} )
+                                                          {'$set':{'title': newTitle, 'icon':newIcon}} )
 
     if oldCategory is not None:
         oldTitle = oldCategory['title']
         updatePointsOfCategoryWithTitle(oldTitle, newTitle)
 
         try:
-            img.save('/usr/src/web/app/static/icons/' + newTitle)
+            img.save('/usr/src/web/app/static/icons/' + newIcon)
         except Exception as e:
             print(e, flush=True)
 
@@ -77,7 +79,7 @@ def updateCategoryVisibility(id):
 
     data = request.get_json()
     newTitle = data['title']
-    icon = "TODO send fname from frontend"
+    icon = data['icon']
     is_visible = data['visible']
     updatedCategory = Category(newTitle, icon)
     updatedCategory.visible = is_visible
