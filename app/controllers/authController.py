@@ -13,6 +13,17 @@ auth = Blueprint("auth", __name__, url_prefix='/auth')
 # no cambiar el lugar del import por las dependencias circulares
 from app import mongo
 
+
+@auth.route('/register', methods=['POST'])
+def register():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    return jsonify(succeded=True), 200  #ALTO hack
+
 # Provide a method to create access tokens. The create_access_token()
 # function is used to actually generate the token, and you can return
 # it to the caller however you choose.
