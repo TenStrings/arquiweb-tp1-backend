@@ -1,4 +1,5 @@
 import flask
+import random
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 
@@ -28,7 +29,7 @@ def addPoint():
     position = pointData['position']
     name = pointData['name']
     description = pointData['description']
-    image = "TODO send fname from Frontend"
+    image = pointData['name']
     categoryName = pointData['categoryName']
 
     newPoint = Point(position, name, description, image, category)
@@ -50,7 +51,7 @@ def updatePointVisibility(id):
     position = pointData['position']
     description = pointData['description']
     categoryName = pointData['categoryName']
-    image = "TODO send fname from Frontend"
+    image = pointData['image']
     visible = pointData['visible']
 
     point = Point(position, name, description, image, categoryName)
@@ -70,29 +71,21 @@ def updatePoint(id):
 
     values = {}
 
-    print(pointData, flush=True)
     name = pointData['name']
-    print('llega2', flush=True)
-    print('llega3', flush=True)
     description = pointData['description']
-    print('llega4', flush=True)
     categoryName = pointData['categoryName']
-    print('llega5', flush=True)
-    visible = pointData['visible']
-    print('llega6', flush=True)
     img = data['file']
-    print('llega7', flush=True)
 
     values['name'] = name
     values['description'] = description
+    values['image'] = name + str(random.randint(0,1000)) #para que cambie y refresque
     values['categoryName'] = categoryName
-    values['visible'] = visible
 
     print('llega8', flush=True)
 
     try:
         print('llega9', flush=True)
-        img.save('/usr/src/web/app/static/pointImages/' + name)
+        img.save('/usr/src/web/app/static/pointImages/' + values['image'])
     except Exception as e:
         print(e, flush=True)
 

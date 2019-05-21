@@ -30,7 +30,7 @@ if __name__ == '__main__':
     point2 = Point({'lat': -34.52, 'lng': -58.55}, 'PF Changs', 'Comida asiática', "PF Changs", "Restaurantes")
     point3 = Point({'lat': -30.52, 'lng': -58.55}, 'Sakiko', 'Comida japonesa', "Sakiko", "Restaurantes")
     point4 = Point({'lat': -34.56, 'lng': -58.4432}, 'Club Amigos', 'Tenis, Football y más', "Club Amigos", "Deportes")
-    point5 = Point({'lat': -34.573, 'lng': -58.4548}, 'Future Bar', 'rica, amaaaaargaa', "Future Bar", "Bares")
+    point5 = Point({'lat': -34.573, 'lng': -58.4548}, 'Future Bar', 'Cerveza artesanal', "Future Bar", "Bares")
 
     cat1 = Category("Restaurantes", "Restaurantes")
     cat2 = Category("Bares", "Bares")
