@@ -32,7 +32,7 @@ def addPoint():
     image = pointData['name']
     categoryName = pointData['categoryName']
 
-    newPoint = Point(position, name, description, image, category)
+    newPoint = Point(position, name, description, image, categoryName)
 
     mongo.db.points.insert_one(newPoint.__dict__)
 
