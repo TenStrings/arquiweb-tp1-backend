@@ -38,6 +38,8 @@ if __name__ == '__main__':
 
     sug1 = Suggestion("Colegios", "Colegios")
     sug2 = Category("Entretenimiento", "Entretenimiento")
+    sug3 = Category("Iglesias", "Iglesias")
+
 
     points.append(point1)
     points.append(point2)
@@ -51,6 +53,7 @@ if __name__ == '__main__':
 
     suggestions.append(sug1)
     suggestions.append(sug2)
+    suggestion.append(sug3)
 
     print("Cargando datos de prueba", flush=True)
 
