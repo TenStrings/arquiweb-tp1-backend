@@ -2,6 +2,10 @@ import flask
 import random
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+import cloudinary
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+import os
 
 from app.model.point import Point
 
@@ -78,16 +82,18 @@ def updatePoint(id):
 
     values['name'] = name
     values['description'] = description
-    values['image'] = name + str(random.randint(0,1000)) #para que cambie y refresque
     values['categoryName'] = categoryName
 
-    print('llega8', flush=True)
-
     try:
-        print('llega9', flush=True)
-        img.save('/usr/src/web/app/static/pointImages/' + values['image'])
+        if os.environ.get('ENV') == 'development':
+            img.save('/usr/src/web/app/static/pointImages/' + id)
+            values['image'] =  "http://localhost:" + os.environ.get('PORT') + "/static/pointImages/" + id
+        else:
+            upload_result = upload(img, public_id = id)
+            values['image'] = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
+
     except Exception as e:
-        print(e, flush=True)
+        print(e.message, flush=True)
 
     ack = mongo.db.points.update({'_id': ObjectId(id)}, {'$set': values})
 
