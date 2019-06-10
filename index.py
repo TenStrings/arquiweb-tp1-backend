@@ -22,6 +22,10 @@ def not_found():
 
 
 if __name__ == '__main__':
+
+    app.debug = os.environ.get('ENV') == 'development'
+    app.run(host='0.0.0.0', port=int(PORT))
+'''
     points = []
     categories = []
     suggestions = []
@@ -37,8 +41,8 @@ if __name__ == '__main__':
     cat3 = Category("Deportes", "Deportes")
 
     sug1 = Suggestion("Colegios", "Colegios")
-    sug2 = Category("Entretenimiento", "Entretenimiento")
-    sug3 = Category("Iglesias", "Iglesias")
+    sug2 =  Suggestion("Entretenimiento", "Entretenimiento")
+    sug3 = Suggestion("Iglesias", "Iglesias")
 
 
     points.append(point1)
@@ -53,7 +57,7 @@ if __name__ == '__main__':
 
     suggestions.append(sug1)
     suggestions.append(sug2)
-    suggestion.append(sug3)
+    suggestions.append(sug3)
 
     print("Cargando datos de prueba", flush=True)
 
@@ -63,15 +67,12 @@ if __name__ == '__main__':
         mongo.db.categories.remove({})
         mongo.db.suggestions.remove({})
 
-        for point in points:
-            mongo.db.points.insert_one(point.__dict__)
-
         for category in categories:
             mongo.db.categories.insert_one(category.__dict__)
 
+        for point in points:
+            mongo.db.points.insert_one(point.__dict__)
+
         for sug in suggestions:
             mongo.db.suggestions.insert_one(sug.__dict__)
-
-
-    app.debug = os.environ.get('ENV') == 'development'
-    app.run(host='0.0.0.0', port=int(PORT))
+'''

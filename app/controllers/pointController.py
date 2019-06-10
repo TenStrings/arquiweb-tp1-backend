@@ -35,9 +35,10 @@ def addPoint():
     description = pointData['description']
     image = pointData['name']
     categoryName = pointData['categoryName']
-
-    newPoint = Point(position, name, description, image, categoryName)
-
+    print("debug", flush=True)
+    categoryId = mongo.db.categories.find_one( {'title':categoryName}, projection={'_id':True} )['_id']
+    print(categoryId, flush=True)
+    newPoint = Point(position, name, description, image, categoryId, categoryName)
     mongo.db.points.insert_one(newPoint.__dict__)
 
     response = flask.make_response(jsonify({'inserted': True}))
