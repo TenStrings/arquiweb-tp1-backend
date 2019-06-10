@@ -2,6 +2,9 @@ import flask
 import random
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
+import cloudinary
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
 import os
 
 from app.model.category import Category
