@@ -26,22 +26,60 @@ def getAllPoints():
 
 @point.route('/point', methods=['POST'])
 def addPoint():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-    pointData = request.get_json()
 
-    position = pointData['position']
-    name = pointData['name']
-    description = pointData['description']
-    image = pointData['name']
-    categoryName = pointData['categoryName']
-    print("debug", flush=True)
-    categoryId = mongo.db.categories.find_one( {'title':categoryName}, projection={'_id':True} )['_id']
-    print(categoryId, flush=True)
-    newPoint = Point(position, name, description, image, categoryId, categoryName)
+    pointData = request.form
+    image = ""
+    image_id = str(random.randint(0,1000))
+    if pointData['has_file']:
+        files = request.files
+        img = files['file']
+
+        if os.environ.get('ENV') == 'development':
+            img.save('/usr/src/web/app/static/pointImages/' + image_id)
+            image =  "http://localhost:" + os.environ.get('PORT') + "/static/pointImages/" + image_id
+        else:
+            upload_result = upload(img, public_id = image_id)
+            image = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
+
+    newPoint = Point(pointData['position'],
+                     pointData['name'],
+                     pointData['description'],
+                     image,
+                     pointData['categoryId'],
+                     pointData['categoryName'])
+
     mongo.db.points.insert_one(newPoint.__dict__)
 
     response = flask.make_response(jsonify({'inserted': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 201
+
+@point.route('/point/<id>', methods=['PUT'])
+def updatePoint(id):
+
+    pointData = request.form
+    values = {}
+    values['name'] = pointData['name']
+    values['description'] = pointData['description']
+    values['image'] = pointData['image']
+    values['categoryId'] = pointData['categoryId']
+    values['categoryName'] = pointData['categoryName']
+
+    if pointData['has_file']:
+        files = request.files
+        img = files['file']
+
+        if os.environ.get('ENV') == 'development':
+            img.save('/usr/src/web/app/static/pointImages/' + id)
+            values['image'] =  "http://localhost:" + os.environ.get('PORT') + "/static/pointImages/" + id
+        else:
+            upload_result = upload(img, public_id = id)
+            values['image'] = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
+
+    mongo.db.points.find_one_and_update({'_id': ObjectId(id)},
+                                        {'$set': values })
+
+    response = flask.make_response(jsonify({'updated': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
 
@@ -50,66 +88,24 @@ def addPoint():
 def updatePointVisibility(id):
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
-    pointData = request.get_json()
 
-    name = pointData['name']
-    position = pointData['position']
-    description = pointData['description']
-    categoryName = pointData['categoryName']
-    image = pointData['image']
-    visible = pointData['visible']
-
-    point = Point(position, name, description, image, categoryName)
-    point.visible = visible
-
-    ack = mongo.db.points.update({'_id': ObjectId(id)}, point.__dict__)
+    is_visible = request.get_json()['visible']
+    mongo.db.points.find_one_and_update({'_id': ObjectId(id)},
+                                        {'$set': {'visible':is_visible}})
 
     response = flask.make_response(jsonify({'updated': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
 
 
-@point.route('/point/<id>', methods=['PUT'])
-def updatePoint(id):
-    data = request.files
-    pointData = request.form
-
-    values = {}
-
-    name = pointData['name']
-    description = pointData['description']
-    categoryName = pointData['categoryName']
-    img = data['file']
-
-    values['name'] = name
-    values['description'] = description
-    values['categoryName'] = categoryName
-
-    try:
-        if os.environ.get('ENV') == 'development':
-            img.save('/usr/src/web/app/static/pointImages/' + id)
-            values['image'] =  "http://localhost:" + os.environ.get('PORT') + "/static/pointImages/" + id
-        else:
-            upload_result = upload(img, public_id = id)
-            values['image'] = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
-
-    except Exception as e:
-        print(e.message, flush=True)
-
-    ack = mongo.db.points.update({'_id': ObjectId(id)}, {'$set': values})
-
-    response = flask.make_response(jsonify({'updated': True}))
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response, 201
+def updatePointsOfCategory(categoryId, newCategoryName):
+    ack = mongo.db.points.update_many({'categoryId': categoryId},
+                                      {'$set': {'categoryName': newCategoryName}})
 
 
-def updatePointsOfCategory(categoryName, newCategoryName, is_visible):
-    ack = mongo.db.points.update_many({'categoryName': categoryName},
-                                      {'$set': {'categoryName': newCategoryName, 'visible': is_visible}})
-
-
-def updatePointsOfCategoryWithTitle(categoryName, newCategoryName):
-    ack = mongo.db.points.update_many({'categoryName': categoryName}, {'$set': {'categoryName': newCategoryName}})
+def updateVisibilityOfCategory(categoryId, is_visible):
+    mongo.db.points.update_many({'categoryId': categoryId},
+                                {'$set': {'visible': is_visible}})
 
 
 @point.route('/point/<id>', methods=['DELETE'])
@@ -121,5 +117,5 @@ def deletePoint(id):
     return response, 200
 
 
-def deletePointsOfCategory(categoryName):
-    db_response = mongo.db.points.remove({'categoryName': categoryName})
+def deletePointsOfCategory(categoryId):
+    db_response = mongo.db.points.remove({'categoryId': categoryId})
