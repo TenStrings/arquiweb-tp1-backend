@@ -41,7 +41,7 @@ def addPoint():
             upload_result = upload(img, public_id)
             image = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
 
-    newPoint = Point(pointData['position'],
+    newPoint = Point({'lat':pointData['positionLat'], 'lng':pointData['positionLng'] },
                      pointData['name'],
                      pointData['description'],
                      image,
