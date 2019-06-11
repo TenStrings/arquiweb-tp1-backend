@@ -26,19 +26,19 @@ def getAllPoints():
 
 @point.route('/point', methods=['POST'])
 def addPoint():
+    print('debugging app', flush=True)
 
     pointData = request.form
     image = ""
-    image_id = str(random.randint(0,1000))
-    if pointData['has_file']:
+    if pointData['has_file']  == "true":
         files = request.files
         img = files['file']
-
         if os.environ.get('ENV') == 'development':
-            img.save('/usr/src/web/app/static/pointImages/' + image_id)
-            image =  "http://localhost:" + os.environ.get('PORT') + "/static/pointImages/" + image_id
+            fake_id = str(random.randint(0,10000))
+            img.save('/usr/src/web/app/static/pointImages/' + fake_id)
+            image =  "http://localhost:" + os.environ.get('PORT') + "/static/pointImages/" + fake_id
         else:
-            upload_result = upload(img, public_id = image_id)
+            upload_result = upload(img, public_id)
             image = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
 
     newPoint = Point(pointData['position'],
@@ -47,6 +47,7 @@ def addPoint():
                      image,
                      pointData['categoryId'],
                      pointData['categoryName'])
+    print(newPoint, flush=True)
 
     mongo.db.points.insert_one(newPoint.__dict__)
 
@@ -65,7 +66,7 @@ def updatePoint(id):
     values['categoryId'] = pointData['categoryId']
     values['categoryName'] = pointData['categoryName']
 
-    if pointData['has_file']:
+    if pointData['has_file'] == "true":
         files = request.files
         img = files['file']
 
