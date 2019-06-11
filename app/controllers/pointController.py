@@ -105,7 +105,7 @@ def updatePointsOfCategory(categoryId, newCategoryName):
 
 
 def updateVisibilityOfCategory(categoryId, is_visible):
-    mongo.db.points.update_many({'categoryId': categoryId},
+    ack = mongo.db.points.update_many({'categoryId': str(categoryId)},
                                 {'$set': {'visible': is_visible}})
 
 
@@ -119,4 +119,4 @@ def deletePoint(id):
 
 
 def deletePointsOfCategory(categoryId):
-    db_response = mongo.db.points.remove({'categoryId': categoryId})
+    db_response = mongo.db.points.remove({'categoryId': str(categoryId)})

@@ -45,11 +45,6 @@ def updateCategory(id):
 
     newTitle = request.form['title']
     newIcon = request.form['icon']
-    print("debuging",flush=True)
-    print(newIcon,flush=True)
-    print(request.form['has_file'],flush=True)
-
-
     #newIcon = newTitle + str(random.randint(0,1000)) #para que cambie el icono y refrezque
     if request.form['has_file'] == "true":
         files = request.files
@@ -80,12 +75,11 @@ def updateCategory(id):
 def updateCategoryVisibility(id):
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
-
     is_visible = request.get_json()['visible']
     oldCategory = mongo.db.categories.find_one_and_update({'_id': ObjectId(id)},
                                                           {'$set': {'visible':is_visible}})
     if oldCategory is not None:
-        updatePointsOfCategory( oldCategory['_id'], is_visible)
+        updateVisibilityOfCategory( oldCategory['_id'], is_visible)
     else:
         pass
 
