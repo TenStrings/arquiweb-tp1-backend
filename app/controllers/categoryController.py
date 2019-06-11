@@ -52,16 +52,11 @@ def updateCategory(id):
 
     #newIcon = newTitle + str(random.randint(0,1000)) #para que cambie el icono y refrezque
     if request.form['has_file'] == "true":
-        print("OKKKKK",flush=True)
-
         files = request.files
         img = files['file']
-        print(img)
-
         if os.environ.get('ENV') == 'development':
             img.save('/usr/src/web/app/static/icons/' + id)
             newIcon =  "http://localhost:" + os.environ.get('PORT') + "/static/icons/" + id
-            print(newIcon,flush=True)
 
         else:
             upload_result = upload(img, public_id = id)
