@@ -115,6 +115,13 @@ def deletePoint(id):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 200
 
+@point.route('/point', methods=['DELETE'])
+def deletePoints():
+    db_response = mongo.db.points.delete({})
+    response = flask.make_response(jsonify({'deleted': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 200
 
 def deletePointsOfCategory(categoryId):
     db_response = mongo.db.points.remove({'categoryId': str(categoryId)})
+    

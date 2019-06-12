@@ -8,7 +8,7 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from app.model.category import Category
 from app.controllers.pointController import (
-    updateVisibilityOfCategory, deletePointsOfCategory, updatePointsOfCategory
+    updateVisibilityOfCategory, deletePointsOfCategory, updatePointsOfCategory, deletePoints
 )
 
 
@@ -96,6 +96,14 @@ def deleteCategory(id):
     else:
         pass
 
+    response = flask.make_response(jsonify({'deleted': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 200
+
+@category.route('/category', methods=['DELETE'])
+def deleteCategories():
+    category = mongo.db.categories.delete({})
+    deletePoints()
     response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 200
