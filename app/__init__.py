@@ -35,5 +35,5 @@ jwt = JWTManager(app)
 def add_claims_to_access_token(identity):
     return {
         'username': identity,
-        'admin': True
+        'admin': identity == 'admin' 
     }
