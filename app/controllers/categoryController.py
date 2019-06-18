@@ -8,78 +8,86 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from app.model.category import Category
 from app.controllers.pointController import (
-    updateVisibilityOfCategory, deletePointsOfCategory, updatePointsOfCategory, deletePoints
+    update_points_of_category,
+    update_visibility_of_category,
+    delete_points_of_category,
+    delete_points
 )
-
+from app.controllers.externProviderController import get_extern_categories
 
 category = Blueprint("category", __name__)
 
 # no cambiar el lugar del import por las dependencias circulares
 from app import mongo
 
-
 @category.route('/category', methods=['GET'])
-def getAllCategories():
-    allCategories = mongo.db.categories.find({})
-    result = [cat for cat in allCategories]
+def get_categories():
+    intern_categories = [cat for cat in mongo.db.categories.find({})]
+    extern_categories = get_extern_categories()
 
-    response = flask.make_response(jsonify(result))
+    #TODO unify categories with the same title
+    categories = intern_categories + extern_categories
+
+    response = flask.make_response(jsonify(categories))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
 @category.route('/category', methods=['POST'])
-def addCategory():
+def add_category():
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
-    pointData = request.get_json()
-    newCategory = Category( pointData['title'], pointData['icon'])
-    mongo.db.categories.insert_one(newCategory.__dict__)
+    data = request.get_json()
+    new_category = Category( data['title'], data['icon'])
+    mongo.db.categories.insert_one(new_category.__dict__)
     response = flask.make_response(jsonify({'inserted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 201
 
 
 @category.route('/category/<id>', methods=['PUT'])
-def updateCategory(id):
-
-    newTitle = request.form['title']
-    newIcon = request.form['icon']
-    #newIcon = newTitle + str(random.randint(0,1000)) #para que cambie el icono y refrezque
+def update_category(id):
+    category_id = ObjectId(id)
+    new_title = request.form['title']
+    new_icon = request.form['icon']
+    #new_icon = new_title + str(random.randint(0,1000)) #para que cambie el icono y refrezque
     if request.form['has_file'] == "true":
         files = request.files
         img = files['file']
         if os.environ.get('ENV') == 'development':
-            img.save('/usr/src/web/app/static/icons/' + id)
-            newIcon =  "http://localhost:" + os.environ.get('PORT') + "/static/icons/" + id
+            fake_id = str(random.randint(0,10000))
+            img.save('/usr/src/web/app/static/icons/' + fake_id)
+            new_icon =  "http://localhost:" + os.environ.get('PORT') + "/static/icons/" + fake_id
 
         else:
             upload_result = upload(img, public_id = id)
-            newIcon = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
+            new_icon = cloudinary.utils.cloudinary_url(upload_result['public_id'])[0]
 
-    oldCategory = mongo.db.categories.find_one_and_update({'_id': ObjectId(id)},
-                                                          {'$set':{'title': newTitle, 'icon':newIcon}} )
-
-    if oldCategory is not None:
-        updatePointsOfCategory(id, newTitle)
+    old_category = mongo.db.categories.find_one_and_update({'_id': category_id},
+                                                           {'$set':{'title': new_title,
+                                                                    'icon':new_icon}} )
+    if old_category is not None:
+        update_points_of_category(category_id, new_title)
         response = flask.make_response(jsonify({'updated': True}))
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response, 201
     else:
-        response = flask.make_response(jsonify({'updated': False, 'message' : 'Category not found'}))
+        response = flask.make_response(jsonify({'updated': False,
+                                                'message' : 'Category not found'}))
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response, 404
 
 
 @category.route('/category/<id>/visibility', methods=['PUT'])
-def updateCategoryVisibility(id):
+def update_category_visibility(id):
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
+    category_id = ObjectId(id)
     is_visible = request.get_json()['visible']
-    oldCategory = mongo.db.categories.find_one_and_update({'_id': ObjectId(id)},
-                                                          {'$set': {'visible':is_visible}})
-    if oldCategory is not None:
-        updateVisibilityOfCategory( oldCategory['_id'], is_visible)
+    old_category = mongo.db.categories.find_one_and_update({'_id': category_id},
+                                                           {'$set': {'visible':is_visible}})
+    if old_category is not None:
+        update_visibility_of_category(category_id, is_visible)
     else:
         pass
 
@@ -89,10 +97,11 @@ def updateCategoryVisibility(id):
 
 
 @category.route('/category/<id>', methods=['DELETE'])
-def deleteCategory(id):
-    category = mongo.db.categories.find_one_and_delete({'_id': ObjectId(id)})
+def delete_category(id):
+    category_id = ObjectId(id)
+    category = mongo.db.categories.find_one_and_delete({'_id': category_id})
     if category is not None:
-        deletePointsOfCategory(category['_id'])
+        delete_points_of_category(category_id)
     else:
         pass
 
@@ -101,9 +110,9 @@ def deleteCategory(id):
     return response, 200
 
 @category.route('/category', methods=['DELETE'])
-def deleteCategories():
+def delete_categories():
     category = mongo.db.categories.delete({})
-    deletePoints()
+    delete_points()
     response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 200
