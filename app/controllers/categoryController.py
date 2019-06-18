@@ -116,3 +116,30 @@ def delete_categories():
     response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response, 200
+
+@category.route('/category/extern/<abs_id>', methods=['POST'])
+def hide_extern_category(abs_id):
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+
+    mongo.db.hidden_extern_categories.insert_one({'abs_id': abs_id,
+                                                  'title':request.get_json()['title']})
+    response = flask.make_response(jsonify({'hidden': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 201
+
+
+@category.route('/category/extern/<abs_id>', methods=['DELETE'])
+def whiten_extern_category(abs_id):
+    mongo.db.hidden_extern_categories.find_one_and_delete({'abs_id': abs_id})
+    response = flask.make_response(jsonify({'deleted': True}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response, 201
+
+@category.route('/category/extern/hidden', methods=['GET'])
+def get_hidden_extern_categories():
+    hidden_categories = [cat for cat in mongo.db.hidden_extern_categories.find({})]
+
+    response = flask.make_response(jsonify(hidden_categories))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response

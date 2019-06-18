@@ -1,5 +1,7 @@
 import uuid
 from bson import ObjectId
+from app import mongo
+
 class Point:
 
     def __init__(self, position, name, description, image,
@@ -25,6 +27,10 @@ class ExternPoint:
         self.image = image
         self.categoryId = categoryId
         self.categoryName = categoryName
-        self.visible = True
         self.extern = True
         self.provider = provider
+        hidden_category = mongo.db.hidden_extern_categories.find_one({'abs_id':provider['cat_abs_id']})
+        if hidden_category is None:
+            self.visible = True
+        else:
+            self.visible = False
