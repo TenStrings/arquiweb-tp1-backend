@@ -112,7 +112,7 @@ def delete_category(id):
 
 @category.route('/category', methods=['DELETE'])
 def delete_categories():
-    category = mongo.db.categories.delete({})
+    category = mongo.db.categories.delete_many({})
     delete_points()
     response = flask.make_response(jsonify({'deleted': True}))
     response.headers['Access-Control-Allow-Origin'] = '*'
