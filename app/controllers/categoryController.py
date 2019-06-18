@@ -23,15 +23,16 @@ from app import mongo
 @category.route('/category', methods=['GET'])
 def get_categories():
     intern_categories = [cat for cat in mongo.db.categories.find({})]
-    extern_categories = get_extern_categories()
-
-    #TODO unify categories with the same title
-    categories = intern_categories + extern_categories
-
-    response = flask.make_response(jsonify(categories))
+    response = flask.make_response(jsonify(intern_categories))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
+@category.route('/category/extern', methods=['GET'])
+def extern_categories():
+    extern_categories = get_extern_categories()
+    response = flask.make_response(jsonify(extern_categories))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @category.route('/category', methods=['POST'])
 def add_category():

@@ -18,9 +18,14 @@ from app import mongo
 @point.route('/point', methods=['GET'])
 def get_points():
     intern_points = [point for point in mongo.db.points.find({})]
+    response = flask.make_response(jsonify(intern_points))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+@point.route('/point/extern', methods=['GET'])
+def extern_points():
     extern_points = get_extern_points()
-    points = intern_points + extern_points #TODO validate no duplicates for position
-    response = flask.make_response(jsonify(points))
+    response = flask.make_response(jsonify(extern_points))
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 

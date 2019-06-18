@@ -6,19 +6,30 @@ from app.model.category import ExternCategory
 def get_extern_points():
 
     extern_points = []
-    provider_1_points = requests.get(
-        url = provider_1.endpoints['points']['url'],
-        params = provider_1.endpoints['points']['params']
-    ).json()
-    adapted_p1_points = adapt_p1_points(provider_1_points)
-    extern_points = extern_points + adapted_p1_points
 
-    provider_2_points = requests.get(
-        url = provider_2.endpoints['points']['url'],
-        params = provider_2.endpoints['points']['params']
-    ).json()
-    adapted_p2_points = adapt_p2_points(provider_2_points)
-    extern_points = extern_points + adapted_p2_points
+    try:
+        r1 = requests.get(
+            url = provider_1.endpoints['points']['url'],
+            params = provider_1.endpoints['points']['params']
+        )
+        r1.raise_for_status()
+        provider_1_points = r1.json()
+        adapted_p1_points = adapt_p1_points(provider_1_points)
+        extern_points = extern_points + adapted_p1_points
+    except requests.exceptions.HTTPError as err:
+        print(err, flush=True)
+
+    try:
+        r2 = requests.get(
+            url = provider_2.endpoints['points']['url'],
+            params = provider_2.endpoints['points']['params']
+        )
+        r2.raise_for_status()
+        provider_2_points = r2.json()
+        adapted_p2_points = adapt_p2_points(provider_2_points)
+        extern_points = extern_points + adapted_p2_points
+    except requests.exceptions.HTTPError as err:
+        print(err, flush=True)
 
     return extern_points
 
@@ -26,19 +37,29 @@ def get_extern_categories():
 
     extern_categories = []
 
-    provider_1_categories = requests.get(
-        url = provider_1.endpoints['categories']['url'],
-        params = provider_1.endpoints['categories']['params']
-    ).json()
-    adapted_p1_categories = adapt_p1_categories(provider_1_categories)
-    extern_categories = extern_categories + adapted_p1_categories
+    try:
+        r1 = requests.get(
+            url = provider_1.endpoints['categories']['url'],
+            params = provider_1.endpoints['categories']['params']
+        )
+        r1.raise_for_status()
+        provider_1_categories = r1.json()
+        adapted_p1_categories = adapt_p1_categories(provider_1_categories)
+        extern_categories = extern_categories + adapted_p1_categories
+    except requests.exceptions.HTTPError as err:
+        print(err, flush=True)
 
-    provider_2_categories = requests.get(
-        url = provider_2.endpoints['categories']['url'],
-        params = provider_2.endpoints['categories']['params']
-    ).json()
-    adapted_p2_categories = adapt_p2_categories(provider_2_categories)
-    extern_categories= extern_categories + adapted_p2_categories
+    try:
+        r2 = requests.get(
+            url = provider_2.endpoints['categories']['url'],
+            params = provider_2.endpoints['categories']['params']
+        )
+        r2.raise_for_status()
+        provider_2_categories = r2.json()
+        adapted_p2_categories = adapt_p2_categories(provider_2_categories)
+        extern_categories= extern_categories + adapted_p2_categories
+    except requests.exceptions.HTTPError as err:
+        print(err, flush=True)
 
     return extern_categories
 
